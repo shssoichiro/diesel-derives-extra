@@ -1,9 +1,9 @@
 [package]
 name = "diesel_derives_traits"
 description = "Traits for diesel_derives_extra"
-homepage = "https://git.onewebdev.info/soichiro/diesel_derives"
+homepage = "https://github.com/shssoichiro/diesel-derives-extra"
 license = "MIT"
-repository = "https://git.onewebdev.info/soichiro/diesel_derives"
+repository = "https://github.com/shssoichiro/diesel-derives-extra"
 version = "0.1.0"
 authors = ["Josh Holmer <jholmer.in@gmail.com>"]
 

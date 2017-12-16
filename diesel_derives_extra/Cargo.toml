@@ -4,10 +4,10 @@ description = "Automatically derive some simple CRUD methods for your Diesel mod
 exclude = [
     "tests/*",
 ]
-homepage = "https://git.onewebdev.info/soichiro/diesel_derives"
+homepage = "https://github.com/shssoichiro/diesel-derives-extra"
 license = "MIT"
 name = "diesel_derives_extra"
-repository = "https://git.onewebdev.info/soichiro/diesel_derives"
+repository = "https://github.com/shssoichiro/diesel-derives-extra"
 version = "0.1.0"
 
 [lib]
