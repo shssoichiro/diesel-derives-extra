@@ -3,6 +3,7 @@
 #![recursion_limit = "128"]
 
 extern crate diesel;
+extern crate diesel_derives_traits;
 extern crate proc_macro;
 #[macro_use]
 extern crate quote;
@@ -23,9 +24,9 @@ fn impl_model(item: &syn::DeriveInput) -> Tokens {
     let name = &item.ident;
 
     quote! (
-        impl<'a> ::Model<'a> for #name
+        impl<'a> ::diesel_derives_traits::Model<'a> for #name
         {
-            fn save(self, conn: &::diesel::PgConnection) -> ::errors::Result<Self> {
+            fn save(self, conn: &::diesel::PgConnection) -> ::diesel::result::QueryResult<Self> {
                 ::diesel::RunQueryDsl::get_result(
                     ::diesel::update(
                         &self
@@ -36,7 +37,7 @@ fn impl_model(item: &syn::DeriveInput) -> Tokens {
                 .map_err(|e| e.into())
             }
 
-            fn find_all(conn: &::diesel::PgConnection) -> ::errors::Result<Vec<Self>> {
+            fn find_all(conn: &::diesel::PgConnection) -> ::diesel::result::QueryResult<Vec<Self>> {
                 ::diesel::RunQueryDsl::load(
                     <Self as ::diesel::associations::HasTable>::table(),
                     conn
@@ -44,7 +45,7 @@ fn impl_model(item: &syn::DeriveInput) -> Tokens {
                 .map_err(|e| e.into())
             }
 
-            fn find_one(conn: &::diesel::PgConnection, id: <Self as ::diesel::associations::Identifiable>::id()) -> ::errors::Result<Option<Self>> {
+            fn find_one(conn: &::diesel::PgConnection, id: <&'a Self as ::diesel::associations::Identifiable>::Id) -> ::diesel::result::QueryResult<Option<Self>> {
                 ::diesel::RunQueryDsl::get_result(
                     <Self as ::diesel::associations::HasTable>::table().find(id),
                     conn
@@ -53,15 +54,15 @@ fn impl_model(item: &syn::DeriveInput) -> Tokens {
                 .map_err(|e| e.into())
             }
 
-            fn exists(conn: &::diesel::PgConnection, id: <Self as ::diesel::associations::Identifiable>::id()) -> ::errors::Result<bool> {
+            fn exists(conn: &::diesel::PgConnection, id: <&'a Self as ::diesel::associations::Identifiable>::Id) -> ::diesel::result::QueryResult<bool> {
                 ::diesel::RunQueryDsl::get_result(
-                    ::diesel::select(::diesel::exists(<Self as ::diesel::associations::HasTable>::table())),
+                    ::diesel::select(::diesel::dsl::exists(<Self as ::diesel::associations::HasTable>::table())),
                     conn
                 )
                 .map_err(|e| e.into())
             }
 
-            fn count_all(conn: &::diesel::PgConnection) -> ::errors::Result<i64> {
+            fn count_all(conn: &::diesel::PgConnection) -> ::diesel::result::QueryResult<i64> {
                 ::diesel::RunQueryDsl::get_result(
                     <Self as ::diesel::associations::HasTable>::table().count(),
                     conn
@@ -69,7 +70,7 @@ fn impl_model(item: &syn::DeriveInput) -> Tokens {
                 .map_err(|e| e.into())
             }
 
-            fn destroy(self, conn: &::diesel::PgConnection) -> ::errors::Result<()> {
+            fn destroy(self, conn: &::diesel::PgConnection) -> ::diesel::result::QueryResult<()> {
                 ::diesel::RunQueryDsl::execute(
                     ::diesel::delete(&self),
                     conn
@@ -92,9 +93,9 @@ fn impl_new_model(item: &syn::DeriveInput) -> Tokens {
     let name = &item.ident;
 
     quote! (
-        impl<'a> ::NewModel<'a> for #name
+        impl ::diesel_derives_traits::NewModel<T: ::diesel::associations::HasTable> for #name
         {
-            fn save<T: ::Model>(self, conn: &::diesel::PgConnection) -> ::errors::Result<T> {
+            fn save(self, conn: &::diesel::PgConnection) -> ::diesel::result::QueryResult<T> {
                 ::diesel::RunQueryDsl::get_result(
                     ::diesel::insert_into(<Self as ::diesel::associations::HasTable>::table())
                         .values(&self),

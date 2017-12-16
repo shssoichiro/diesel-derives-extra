@@ -1,0 +1,14 @@
+[package]
+name = "diesel_derives_traits"
+version = "0.1.0"
+authors = ["Josh Holmer <jholmer.in@gmail.com>"]
+
+[dependencies]
+
+[dependencies.clippy]
+optional = true
+version = "*"
+
+[dependencies.diesel]
+features = ["postgres"]
+version = "1.0.0-beta1"
