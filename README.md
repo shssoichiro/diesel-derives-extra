@@ -12,8 +12,6 @@ Automatically derive some simple CRUD methods for your Diesel models.
 For models that are used for representing data in the database, you can use the following:
 
 ```rust
-use diesel_derives_traits::Model;
-
 #[derive(Debug, Queryable, Identifiable, AsChangeset, Model)]
 pub struct User {
     // fields omitted
@@ -41,8 +39,6 @@ fn destroy(self, conn: &PgConnection) -> QueryResult<()>;
 For models that are used for inserting new data into a table, you can use the following:
 
 ```rust
-use diesel_derives_traits::NewModel;
-
 #[derive(Debug, Insertable, NewModel)]
 #[model(User)]
 struct NewUser {
