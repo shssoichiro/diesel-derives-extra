@@ -4,7 +4,7 @@ Automatically derive some simple CRUD methods for your Diesel models.
 
 ## Basic usage
 
-- Add `diesel_derives_extra` to your `Cargo.toml`
+- Add `diesel_derives_extra` and `diesel_derives_traits` to your `Cargo.toml`
 - Add `#[macro_use] extern crate diesel_derives_extra;` and `extern crate diesel_derives_traits;` to your project's entry point
 
 ### Models
