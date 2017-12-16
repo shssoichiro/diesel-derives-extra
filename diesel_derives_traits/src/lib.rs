@@ -22,9 +22,12 @@ where
     fn destroy(self, conn: &PgConnection) -> QueryResult<()>;
 }
 
-//pub trait NewModel<T>: Insertable<T>
-//where
-//    T: ::diesel::associations::HasTable,
-//{
-//    fn save(self, conn: &PgConnection) -> QueryResult<T>;
-//}
+pub trait NewModel<'a, T>
+where
+    &'a T: HasTable,
+    T: 'a,
+    &'a Self: Insertable<<&'a T as HasTable>::Table>,
+    Self: 'a,
+{
+    fn save(self, conn: &PgConnection) -> QueryResult<T>;
+}

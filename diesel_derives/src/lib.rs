@@ -105,11 +105,11 @@ fn impl_new_model(item: &syn::DeriveInput) -> Tokens {
     };
 
     quote! (
-        impl ::diesel_derives_traits::NewModel<#target_name> for #name
+        impl<'a> ::diesel_derives_traits::NewModel<'a, #target_name> for #name
         {
             fn save(self, conn: &::diesel::PgConnection) -> ::diesel::result::QueryResult<#target_name> {
                 ::diesel::RunQueryDsl::get_result(
-                    ::diesel::insert_into(<Self as ::diesel::associations::HasTable>::table())
+                    ::diesel::insert_into(<#target_name as ::diesel::associations::HasTable>::table())
                         .values(&self),
                     conn
                 )
