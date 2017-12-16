@@ -20,5 +20,6 @@ features = ["postgres"]
 version = "1.0.0-beta1"
 
 [dependencies.diesel_derives_traits]
-git = "https://git.onewebdev.info/soichiro/diesel_derives"
+#git = "https://git.onewebdev.info/soichiro/diesel_derives"
+path = "../diesel_derives_traits"
 version = "0.1.0"
