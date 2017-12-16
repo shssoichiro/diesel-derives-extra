@@ -9,21 +9,22 @@ use diesel::associations::HasTable;
 pub trait Model<'a>
 where
     &'a Self: Identifiable,
-    Self: Sized + 'a
+    Self: Sized + 'a,
 {
-    fn save(self, conn: &::diesel::PgConnection) -> ::diesel::result::QueryResult<Self>;
-    fn find_all(conn: &::diesel::PgConnection) -> ::diesel::result::QueryResult<Vec<Self>>;
+    fn save(self, conn: &PgConnection) -> QueryResult<Self>;
+    fn find_all(conn: &PgConnection) -> QueryResult<Vec<Self>>;
     fn find_one(
-        conn: &::diesel::PgConnection,
-        id: <&'a Self as ::diesel::Identifiable>::Id,
-    ) -> ::diesel::result::QueryResult<Option<Self>>;
-    fn count_all(conn: &::diesel::PgConnection) -> ::diesel::result::QueryResult<i64>;
-    fn destroy(self, conn: &::diesel::PgConnection) -> ::diesel::result::QueryResult<()>;
+        conn: &PgConnection,
+        id: <&'a Self as Identifiable>::Id,
+    ) -> QueryResult<Option<Self>>;
+    fn exists(conn: &PgConnection, id: <&'a Self as Identifiable>::Id) -> QueryResult<bool>;
+    fn count_all(conn: &PgConnection) -> QueryResult<i64>;
+    fn destroy(self, conn: &PgConnection) -> QueryResult<()>;
 }
 
 //pub trait NewModel<T>: Insertable<T>
 //where
 //    T: ::diesel::associations::HasTable,
 //{
-//    fn save(self, conn: &::diesel::PgConnection) -> ::diesel::result::QueryResult<T>;
+//    fn save(self, conn: &PgConnection) -> QueryResult<T>;
 //}

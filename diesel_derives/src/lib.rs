@@ -54,6 +54,16 @@ fn impl_model(item: &DeriveInput) -> Tokens {
                 .map_err(|e| e.into())
             }
 
+            fn exists(conn: &::diesel::PgConnection, id: <&'a Self as ::diesel::associations::Identifiable>::Id) -> ::diesel::result::QueryResult<bool> {
+                use diesel::QueryDsl;
+
+                ::diesel::RunQueryDsl::get_result(
+                    ::diesel::select(::diesel::dsl::exists(<Self as ::diesel::associations::HasTable>::table().find(id))),
+                    conn
+                )
+                .map_err(|e| e.into())
+            }
+
             fn count_all(conn: &::diesel::PgConnection) -> ::diesel::result::QueryResult<i64> {
                 use diesel::QueryDsl;
 
