@@ -1,10 +1,10 @@
 [package]
 authors = ["Josh Holmer <jholmer.in@gmail.com>"]
-name = "diesel_derives"
+name = "diesel_derives_extra"
 version = "0.1.0"
 
 [lib]
-name = "diesel_derives"
+name = "diesel_derives_extra"
 proc-macro = true
 
 [dependencies]
@@ -20,6 +20,5 @@ features = ["postgres"]
 version = "1.0.0-beta1"
 
 [dependencies.diesel_derives_traits]
-#git = "https://git.onewebdev.info/soichiro/diesel_derives"
-path = "../diesel_derives_traits"
+git = "https://git.onewebdev.info/soichiro/diesel_derives"
 version = "0.1.0"

@@ -1,9 +1,9 @@
 [workspace]
 members = [
-"diesel_derives",
+"diesel_derives_extra",
 "diesel_derives_traits"
 ]
 
 [replace]
-"diesel_derives:0.1.0" = { path = "diesel_derives" }
+"diesel_derives_extra:0.1.0" = { path = "diesel_derives_extra" }
 "diesel_derives_traits:0.1.0" = { path = "diesel_derives_traits" }

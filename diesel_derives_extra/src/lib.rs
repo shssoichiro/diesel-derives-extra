@@ -10,7 +10,7 @@ extern crate quote;
 extern crate syn;
 
 use proc_macro::TokenStream;
-use quote::Tokens;
+use quote::{ToTokens, Tokens};
 use syn::{parse_derive_input, DeriveInput};
 
 #[proc_macro_derive(Model)]
@@ -92,6 +92,9 @@ pub fn derive_new_model(input: TokenStream) -> TokenStream {
 
 fn impl_new_model(item: &syn::DeriveInput) -> Tokens {
     let name = &item.ident;
+    let mut tokens = Tokens::new();
+    name.to_tokens(&mut tokens);
+    item.generics.to_tokens(&mut tokens);
     let target = item.attrs
         .iter()
         .find(|attr| attr.name() == "model")
@@ -105,7 +108,7 @@ fn impl_new_model(item: &syn::DeriveInput) -> Tokens {
     };
 
     quote! (
-        impl<'a> ::diesel_derives_traits::NewModel<'a, #target_name> for #name
+        impl<'a> ::diesel_derives_traits::NewModel<'a, #target_name> for #tokens
         {
             fn save(self, conn: &::diesel::PgConnection) -> ::diesel::result::QueryResult<#target_name> {
                 ::diesel::RunQueryDsl::get_result(
