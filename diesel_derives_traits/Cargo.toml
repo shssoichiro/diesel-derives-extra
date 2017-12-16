@@ -11,7 +11,7 @@ authors = ["Josh Holmer <jholmer.in@gmail.com>"]
 
 [dependencies.clippy]
 optional = true
-version = "*"
+version = "0.0.150"
 
 [dependencies.diesel]
 features = ["postgres"]

@@ -20,7 +20,7 @@ syn = "0.11.11"
 
 [dependencies.clippy]
 optional = true
-version = "*"
+version = "0.0.150"
 
 [dependencies.diesel]
 features = ["postgres"]
