@@ -1,6 +1,13 @@
 [package]
 authors = ["Josh Holmer <jholmer.in@gmail.com>"]
+description = "Automatically derive some simple CRUD methods for your Diesel models"
+exclude = [
+    "tests/*",
+]
+homepage = "https://git.onewebdev.info/soichiro/diesel_derives"
+license = "MIT"
 name = "diesel_derives_extra"
+repository = "https://git.onewebdev.info/soichiro/diesel_derives"
 version = "0.1.0"
 
 [lib]
@@ -20,5 +27,4 @@ features = ["postgres"]
 version = "1.0.0-beta1"
 
 [dependencies.diesel_derives_traits]
-git = "https://git.onewebdev.info/soichiro/diesel_derives"
 version = "0.1.0"
