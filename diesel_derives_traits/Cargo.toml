@@ -4,7 +4,7 @@ description = "Traits for diesel_derives_extra"
 homepage = "https://github.com/shssoichiro/diesel-derives-extra"
 license = "MIT"
 repository = "https://github.com/shssoichiro/diesel-derives-extra"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Josh Holmer <jholmer.in@gmail.com>"]
 
 [dependencies]
@@ -15,4 +15,4 @@ version = "0.0.150"
 
 [dependencies.diesel]
 features = ["postgres"]
-version = "1.0.0-beta1"
+version = "1.0.0"
