@@ -6,28 +6,27 @@ extern crate diesel;
 use diesel::prelude::*;
 use diesel::associations::HasTable;
 
-pub trait Model<'a>
+pub trait Model<'a, C>
 where
     &'a Self: Identifiable,
+    C: Connection,
     Self: Sized + 'a,
 {
-    fn save(self, conn: &PgConnection) -> QueryResult<Self>;
-    fn find_all(conn: &PgConnection) -> QueryResult<Vec<Self>>;
-    fn find_one(
-        conn: &PgConnection,
-        id: <&'a Self as Identifiable>::Id,
-    ) -> QueryResult<Option<Self>>;
-    fn exists(conn: &PgConnection, id: <&'a Self as Identifiable>::Id) -> QueryResult<bool>;
-    fn count_all(conn: &PgConnection) -> QueryResult<i64>;
-    fn destroy(self, conn: &PgConnection) -> QueryResult<()>;
+    fn save(self, conn: &C) -> QueryResult<Self>;
+    fn find_all(conn: &C) -> QueryResult<Vec<Self>>;
+    fn find_one(conn: &C, id: <&'a Self as Identifiable>::Id) -> QueryResult<Option<Self>>;
+    fn exists(conn: &C, id: <&'a Self as Identifiable>::Id) -> QueryResult<bool>;
+    fn count_all(conn: &C) -> QueryResult<i64>;
+    fn destroy(self, conn: &C) -> QueryResult<()>;
 }
 
-pub trait NewModel<'a, T>
+pub trait NewModel<'a, T, C>
 where
     &'a T: HasTable,
     T: 'a,
+    C: Connection,
     &'a Self: Insertable<<&'a T as HasTable>::Table>,
     Self: 'a,
 {
-    fn save(self, conn: &PgConnection) -> QueryResult<T>;
+    fn save(self, conn: &C) -> QueryResult<T>;
 }

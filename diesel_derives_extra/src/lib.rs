@@ -1,9 +1,11 @@
 #![cfg_attr(feature = "clippy", feature(plugin))]
 #![cfg_attr(feature = "clippy", plugin(clippy))]
-#![recursion_limit = "128"]
+#![recursion_limit = "256"]
 
 extern crate diesel;
 extern crate diesel_derives_traits;
+#[macro_use]
+extern crate lazy_static;
 extern crate proc_macro;
 #[macro_use]
 extern crate quote;
@@ -11,7 +13,29 @@ extern crate syn;
 
 use proc_macro::TokenStream;
 use quote::{ToTokens, Tokens};
-use syn::{parse_derive_input, DeriveInput};
+use syn::{parse_derive_input, DeriveInput, Ident};
+
+lazy_static! {
+    static ref IDENTS: Vec<Ident> = {
+        let mut idents = Vec::new();
+        #[cfg(feature="postgres")]
+        { idents.push(Ident::new("::diesel::pg::PgConnection")); }
+//        #[cfg(feature="mysql")]
+//        { idents.push(Ident::new("::diesel::mysql::MysqlConnection")); }
+//        #[cfg(feature="sqlite")]
+//        { idents.push(Ident::new("::diesel::sqlite::SqliteConnection")); }
+        #[cfg(feature="logger")]
+        {
+            #[cfg(feature="postgres")]
+            { idents.push(Ident::new("::diesel_logger::LoggingConnection<::diesel::pg::PgConnection>")); }
+//            #[cfg(feature="mysql")]
+//            { idents.push(Ident::new("::diesel_logger::LoggingConnection<::diesel::mysql::MysqlConnection>")); }
+//            #[cfg(feature="sqlite")]
+//            { idents.push(Ident::new("::diesel_logger::LoggingConnection<::diesel::sqlite::SqliteConnection>")); }
+        }
+        idents
+    };
+}
 
 #[proc_macro_derive(Model)]
 pub fn derive_model(input: TokenStream) -> TokenStream {
@@ -21,10 +45,13 @@ pub fn derive_model(input: TokenStream) -> TokenStream {
 fn impl_model(item: &DeriveInput) -> Tokens {
     let name = &item.ident;
 
-    quote! (
-        impl<'a> ::diesel_derives_traits::Model<'a> for #name
+    IDENTS
+        .iter()
+        .map(|conn_impl| {
+            quote!(
+        impl<'a> ::diesel_derives_traits::Model<'a, #conn_impl> for #name
         {
-            fn save(self, conn: &::diesel::PgConnection) -> ::diesel::result::QueryResult<Self> {
+            fn save(self, conn: &#conn_impl) -> ::diesel::result::QueryResult<Self> {
                 ::diesel::RunQueryDsl::get_result(
                     ::diesel::update(
                         &self
@@ -35,7 +62,7 @@ fn impl_model(item: &DeriveInput) -> Tokens {
                 .map_err(|e| e.into())
             }
 
-            fn find_all(conn: &::diesel::PgConnection) -> ::diesel::result::QueryResult<Vec<Self>> {
+            fn find_all(conn: &#conn_impl) -> ::diesel::result::QueryResult<Vec<Self>> {
                 ::diesel::RunQueryDsl::load(
                     <Self as ::diesel::associations::HasTable>::table(),
                     conn
@@ -43,7 +70,7 @@ fn impl_model(item: &DeriveInput) -> Tokens {
                 .map_err(|e| e.into())
             }
 
-            fn find_one(conn: &::diesel::PgConnection, id: <&'a Self as ::diesel::Identifiable>::Id) -> ::diesel::result::QueryResult<Option<Self>> {
+            fn find_one(conn: &#conn_impl, id: <&'a Self as ::diesel::Identifiable>::Id) -> ::diesel::result::QueryResult<Option<Self>> {
                 use diesel::{OptionalExtension, QueryDsl};
 
                 ::diesel::RunQueryDsl::get_result(
@@ -54,7 +81,7 @@ fn impl_model(item: &DeriveInput) -> Tokens {
                 .map_err(|e| e.into())
             }
 
-            fn exists(conn: &::diesel::PgConnection, id: <&'a Self as ::diesel::associations::Identifiable>::Id) -> ::diesel::result::QueryResult<bool> {
+            fn exists(conn: &#conn_impl, id: <&'a Self as ::diesel::associations::Identifiable>::Id) -> ::diesel::result::QueryResult<bool> {
                 use diesel::QueryDsl;
 
                 ::diesel::RunQueryDsl::get_result(
@@ -64,7 +91,7 @@ fn impl_model(item: &DeriveInput) -> Tokens {
                 .map_err(|e| e.into())
             }
 
-            fn count_all(conn: &::diesel::PgConnection) -> ::diesel::result::QueryResult<i64> {
+            fn count_all(conn: &#conn_impl) -> ::diesel::result::QueryResult<i64> {
                 use diesel::QueryDsl;
 
                 ::diesel::RunQueryDsl::get_result(
@@ -74,7 +101,7 @@ fn impl_model(item: &DeriveInput) -> Tokens {
                 .map_err(|e| e.into())
             }
 
-            fn destroy(self, conn: &::diesel::PgConnection) -> ::diesel::result::QueryResult<()> {
+            fn destroy(self, conn: &#conn_impl) -> ::diesel::result::QueryResult<()> {
                 ::diesel::RunQueryDsl::execute(
                     ::diesel::delete(&self),
                     conn
@@ -83,6 +110,11 @@ fn impl_model(item: &DeriveInput) -> Tokens {
             }
         }
     )
+        })
+        .fold(Tokens::new(), |mut tokens, cur| {
+            tokens.append(cur);
+            tokens
+        })
 }
 
 #[proc_macro_derive(NewModel, attributes(model))]
@@ -107,19 +139,27 @@ fn impl_new_model(item: &syn::DeriveInput) -> Tokens {
         _ => panic!("Must be in the form of `#[model(MyModel)]`"),
     };
 
-    quote! (
-        impl<'a> ::diesel_derives_traits::NewModel<'a, #target_name> for #tokens
-        {
-            fn save(self, conn: &::diesel::PgConnection) -> ::diesel::result::QueryResult<#target_name> {
-                ::diesel::RunQueryDsl::get_result(
-                    ::diesel::insert_into(<#target_name as ::diesel::associations::HasTable>::table())
-                        .values(&self),
-                    conn
-                )
-                .map_err(|e| e.into())
+    IDENTS
+        .iter()
+        .map(|conn_impl| {
+            quote!(
+            impl<'a> ::diesel_derives_traits::NewModel<'a, #target_name, #conn_impl> for #tokens
+            {
+                fn save(self, conn: &#conn_impl) -> ::diesel::result::QueryResult<#target_name> {
+                    ::diesel::RunQueryDsl::get_result(
+                        ::diesel::insert_into(<#target_name as ::diesel::associations::HasTable>::table())
+                            .values(&self),
+                        conn
+                    )
+                    .map_err(|e| e.into())
+                }
             }
-        }
-    )
+        )
+        })
+        .fold(Tokens::new(), |mut tokens, cur| {
+            tokens.append(cur);
+            tokens
+        })
 }
 
 fn expand_derive(input: &TokenStream, f: fn(&DeriveInput) -> Tokens) -> TokenStream {

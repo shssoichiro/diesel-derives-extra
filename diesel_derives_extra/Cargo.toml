@@ -8,7 +8,7 @@ homepage = "https://github.com/shssoichiro/diesel-derives-extra"
 license = "MIT"
 name = "diesel_derives_extra"
 repository = "https://github.com/shssoichiro/diesel-derives-extra"
-version = "0.1.1"
+version = "0.1.2"
 
 [lib]
 name = "diesel_derives_extra"
@@ -17,14 +17,25 @@ proc-macro = true
 [dependencies]
 quote = "0.3.15"
 syn = "0.11.11"
+lazy_static = "1.0.0"
 
 [dependencies.clippy]
 optional = true
-version = "0.0.150"
+version = "0.0.179"
 
 [dependencies.diesel]
-features = ["postgres"]
 version = "1.0.0"
 
 [dependencies.diesel_derives_traits]
-version = "0.1.1"
+version = "0.1.2"
+
+[dependencies.diesel_logger]
+version = "0.1.0"
+optional = true
+
+[features]
+"default" = ["postgres"]
+"postgres" = ["diesel/postgres"]
+#"mysql" = ["diesel/mysql"]
+#"sqlite" = ["diesel/sqlite"]
+"logger" = ["diesel_logger"]
