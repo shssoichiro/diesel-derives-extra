@@ -1,51 +1,53 @@
-#![cfg_attr(feature = "clippy", feature(plugin))]
-#![cfg_attr(feature = "clippy", plugin(clippy))]
 #![recursion_limit = "256"]
 
 extern crate diesel;
 extern crate diesel_derives_traits;
-#[macro_use]
-extern crate lazy_static;
 extern crate proc_macro;
-#[macro_use]
+extern crate proc_macro2;
 extern crate quote;
 extern crate syn;
 
 use proc_macro::TokenStream;
-use quote::{ToTokens, Tokens};
-use syn::{parse_derive_input, DeriveInput, Ident};
+use proc_macro2::TokenStream as TokenStream2;
+use quote::{quote, ToTokens};
+use std::iter::FromIterator;
+use syn::{parse_macro_input, DeriveInput, Meta, MetaList, NestedMeta};
 
-lazy_static! {
-    static ref IDENTS: Vec<Ident> = {
-        let mut idents = Vec::new();
-        #[cfg(feature="postgres")]
-        { idents.push(Ident::new("::diesel::pg::PgConnection")); }
-//        #[cfg(feature="mysql")]
-//        { idents.push(Ident::new("::diesel::mysql::MysqlConnection")); }
-//        #[cfg(feature="sqlite")]
-//        { idents.push(Ident::new("::diesel::sqlite::SqliteConnection")); }
-        #[cfg(feature="logger")]
+fn get_idents() -> Vec<TokenStream2> {
+    let mut idents = Vec::new();
+    #[cfg(feature = "postgres")]
+    {
+        idents.push(quote!(::diesel::pg::PgConnection));
+    }
+    // #[cfg(feature="mysql")]
+    // { idents.push(quote!(::diesel::mysql::MysqlConnection)); }
+    // #[cfg(feature="sqlite")]
+    // { idents.push(quote!(::diesel::sqlite::SqliteConnection)); }
+    #[cfg(feature = "logger")]
+    {
+        #[cfg(feature = "postgres")]
         {
-            #[cfg(feature="postgres")]
-            { idents.push(Ident::new("::diesel_logger::LoggingConnection<::diesel::pg::PgConnection>")); }
-//            #[cfg(feature="mysql")]
-//            { idents.push(Ident::new("::diesel_logger::LoggingConnection<::diesel::mysql::MysqlConnection>")); }
-//            #[cfg(feature="sqlite")]
-//            { idents.push(Ident::new("::diesel_logger::LoggingConnection<::diesel::sqlite::SqliteConnection>")); }
+            idents.push(quote!(
+                ::diesel_logger::LoggingConnection<::diesel::pg::PgConnection>
+            ));
         }
-        idents
-    };
+        // #[cfg(feature="mysql")]
+        // { idents.push(quote!(::diesel_logger::LoggingConnection<::diesel::mysql::MysqlConnection>)); }
+        // #[cfg(feature="sqlite")]
+        // { idents.push(quote!(::diesel_logger::LoggingConnection<::diesel::sqlite::SqliteConnection>)); }
+    }
+    idents
 }
 
 #[proc_macro_derive(Model)]
 pub fn derive_model(input: TokenStream) -> TokenStream {
-    expand_derive(&input, impl_model)
+    expand_derive(input, impl_model)
 }
 
-fn impl_model(item: &DeriveInput) -> Tokens {
+fn impl_model(item: &DeriveInput) -> TokenStream2 {
     let name = &item.ident;
 
-    IDENTS
+    TokenStream2::from_iter(get_idents()
         .iter()
         .map(|conn_impl| {
             quote!(
@@ -110,36 +112,36 @@ fn impl_model(item: &DeriveInput) -> Tokens {
             }
         }
     )
-        })
-        .fold(Tokens::new(), |mut tokens, cur| {
-            tokens.append(cur);
-            tokens
-        })
+        }))
 }
 
 #[proc_macro_derive(NewModel, attributes(model))]
 pub fn derive_new_model(input: TokenStream) -> TokenStream {
-    expand_derive(&input, impl_new_model)
+    expand_derive(input, impl_new_model)
 }
 
-fn impl_new_model(item: &syn::DeriveInput) -> Tokens {
+fn impl_new_model(item: &DeriveInput) -> TokenStream2 {
     let name = &item.ident;
-    let mut tokens = Tokens::new();
+    let mut tokens = TokenStream2::new();
     name.to_tokens(&mut tokens);
     item.generics.to_tokens(&mut tokens);
-    let target = item.attrs
+    let target = item
+        .attrs
         .iter()
-        .find(|attr| attr.name() == "model")
+        .find(|attr| attr.path.segments[0].ident == "model")
         .expect("\"model\" attribute must be specified for #[derive(NewModel)]");
-    let target_name = match target.value {
-        syn::MetaItem::List(_, ref options) if options.len() >= 1 => match options[0] {
-            syn::NestedMetaItem::MetaItem(syn::MetaItem::Word(ref name)) => name.clone(),
+    let target_name = match target
+        .parse_meta()
+        .expect("Must be in the form of `#[model(MyModel)]`")
+    {
+        Meta::List(MetaList { ref nested, .. }) if !nested.is_empty() => match nested[0] {
+            NestedMeta::Meta(Meta::Word(ref ident)) => ident.clone(),
             _ => panic!("Must be in the form of `#[model(MyModel)]`"),
         },
         _ => panic!("Must be in the form of `#[model(MyModel)]`"),
     };
 
-    IDENTS
+    TokenStream2::from_iter(get_idents()
         .iter()
         .map(|conn_impl| {
             quote!(
@@ -155,14 +157,10 @@ fn impl_new_model(item: &syn::DeriveInput) -> Tokens {
                 }
             }
         )
-        })
-        .fold(Tokens::new(), |mut tokens, cur| {
-            tokens.append(cur);
-            tokens
-        })
+        }))
 }
 
-fn expand_derive(input: &TokenStream, f: fn(&DeriveInput) -> Tokens) -> TokenStream {
-    let item = parse_derive_input(&input.to_string()).unwrap();
+fn expand_derive(input: TokenStream, f: fn(&DeriveInput) -> TokenStream2) -> TokenStream {
+    let item = parse_macro_input!(input as DeriveInput);
     f(&item).to_string().parse().unwrap()
 }

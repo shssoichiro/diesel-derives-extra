@@ -15,19 +15,11 @@ name = "diesel_derives_extra"
 proc-macro = true
 
 [dependencies]
-quote = "0.3.15"
-syn = "0.11.11"
-lazy_static = "1.0.0"
-
-[dependencies.clippy]
-optional = true
-version = "0.0.179"
-
-[dependencies.diesel]
-version = "1.0.0"
-
-[dependencies.diesel_derives_traits]
-version = "0.1.2"
+diesel = "1.0.0"
+diesel_derives_traits = "0.1.2"
+proc-macro2 = "0.4"
+quote = "0.6"
+syn = "0.15"
 
 [dependencies.diesel_logger]
 version = "0.1.0"

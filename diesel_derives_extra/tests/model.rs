@@ -3,7 +3,7 @@ extern crate diesel;
 #[macro_use]
 extern crate diesel_derives_extra;
 extern crate diesel_derives_traits;
-#[cfg(feature="logger")]
+#[cfg(feature = "logger")]
 extern crate diesel_logger;
 
 #[test]

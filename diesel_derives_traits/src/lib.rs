@@ -3,8 +3,8 @@
 
 extern crate diesel;
 
-use diesel::prelude::*;
 use diesel::associations::HasTable;
+use diesel::prelude::*;
 
 pub trait Model<'a, C>
 where
