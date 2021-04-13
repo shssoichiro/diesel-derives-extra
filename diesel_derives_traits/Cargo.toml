@@ -8,4 +8,4 @@ version = "0.2.0"
 authors = ["Josh Holmer <jholmer.in@gmail.com>", "Berkus Decker <berkus+cargo@gmail.com"]
 
 [dependencies]
-diesel = "1.0.0"
+diesel = "1.4.6"
