@@ -6,6 +6,7 @@ license = "MIT"
 repository = "https://github.com/shssoichiro/diesel-derives-extra"
 version = "0.2.0"
 authors = ["Josh Holmer <jholmer.in@gmail.com>", "Berkus Decker <berkus+cargo@gmail.com"]
+edition = "2018"
 
 [dependencies]
 diesel = "1.4.6"
