@@ -1,5 +1,5 @@
 [package]
-authors = ["Josh Holmer <jholmer.in@gmail.com>"]
+authors = ["Josh Holmer <jholmer.in@gmail.com>", "Berkus Decker <berkus+cargo@gmail.com"]
 description = "Automatically derive some simple CRUD methods for your Diesel models"
 exclude = [
     "tests/*",
@@ -8,7 +8,7 @@ homepage = "https://github.com/shssoichiro/diesel-derives-extra"
 license = "MIT"
 name = "diesel_derives_extra"
 repository = "https://github.com/shssoichiro/diesel-derives-extra"
-version = "0.1.2"
+version = "0.2.0"
 
 [lib]
 name = "diesel_derives_extra"
@@ -22,7 +22,7 @@ quote = "0.6"
 syn = "0.15"
 
 [dependencies.diesel_logger]
-version = "0.1.0"
+version = "0.1.1"
 optional = true
 
 [features]
