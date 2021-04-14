@@ -19,7 +19,7 @@ diesel = "1.4.6"
 diesel_derives_traits = "0.2.0"
 proc-macro2 = "1.0.26"
 quote = "1.0.9"
-syn = "0.15"
+syn = "1.0.69"
 
 [dependencies.diesel_logger]
 version = "0.1.1"
