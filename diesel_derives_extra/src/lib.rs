@@ -135,7 +135,7 @@ fn impl_new_model(item: &DeriveInput) -> TokenStream2 {
         .expect("Must be in the form of `#[model(MyModel)]`")
     {
         Meta::List(MetaList { ref nested, .. }) if !nested.is_empty() => match nested[0] {
-            NestedMeta::Meta(Meta::Word(ref ident)) => ident.clone(),
+            NestedMeta::Meta(Meta::Path(ref ident)) => ident.clone(),
             _ => panic!("Must be in the form of `#[model(MyModel)]`"),
         },
         _ => panic!("Must be in the form of `#[model(MyModel)]`"),

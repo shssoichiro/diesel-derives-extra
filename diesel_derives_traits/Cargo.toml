@@ -4,8 +4,9 @@ description = "Traits for diesel_derives_extra"
 homepage = "https://github.com/shssoichiro/diesel-derives-extra"
 license = "MIT"
 repository = "https://github.com/shssoichiro/diesel-derives-extra"
-version = "0.1.3"
-authors = ["Josh Holmer <jholmer.in@gmail.com>"]
+version = "0.2.0"
+authors = ["Josh Holmer <jholmer.in@gmail.com>", "Berkus Decker <berkus+cargo@gmail.com"]
+edition = "2018"
 
 [dependencies]
-diesel = "1.0.0"
+diesel = "1.4.6"
