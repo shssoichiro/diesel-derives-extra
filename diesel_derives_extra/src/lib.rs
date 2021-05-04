@@ -10,7 +10,6 @@ extern crate syn;
 use proc_macro::TokenStream;
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote, ToTokens};
-use std::iter::FromIterator;
 use syn::{parse_macro_input, DeriveInput, Meta, MetaList, NestedMeta};
 
 fn get_idents() -> Vec<TokenStream2> {
@@ -47,7 +46,7 @@ pub fn derive_model(input: TokenStream) -> TokenStream {
 fn impl_model(item: &DeriveInput) -> TokenStream2 {
     let name = &item.ident;
 
-    TokenStream2::from_iter(get_idents()
+    get_idents()
         .iter()
         .map(|conn_impl| {
             quote!(
@@ -112,7 +111,7 @@ fn impl_model(item: &DeriveInput) -> TokenStream2 {
             }
         }
     )
-        }))
+        }).collect()
 }
 
 #[proc_macro_derive(NewModel, attributes(model))]
@@ -141,7 +140,7 @@ fn impl_new_model(item: &DeriveInput) -> TokenStream2 {
         _ => panic!("Must be in the form of `#[model(MyModel)]`"),
     };
 
-    TokenStream2::from_iter(get_idents()
+    get_idents()
         .iter()
         .map(|conn_impl| {
             quote!(
@@ -157,7 +156,7 @@ fn impl_new_model(item: &DeriveInput) -> TokenStream2 {
                 }
             }
         )
-        }))
+        }).collect()
 }
 
 fn expand_derive(input: TokenStream, f: fn(&DeriveInput) -> TokenStream2) -> TokenStream {
